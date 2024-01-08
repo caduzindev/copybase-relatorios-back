@@ -37,7 +37,6 @@ export class ReportUseCase implements IReportUseCase {
                 .on('data', (data) => data.push(data))
                 .on('end', () => {
                     try {
-
                         const monthlyData: Record<string, {
                             MRR: number,
                             churnRate: number,
