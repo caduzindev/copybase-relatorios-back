@@ -1,7 +1,7 @@
 import { StatusReport } from "../../enum/report/StatusReport";
 
 export class Report<T> {
-    id: string;
+    id?: string;
     fileName: string;
     status: StatusReport
     resultProcess?: T;
