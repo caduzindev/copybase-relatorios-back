@@ -89,7 +89,6 @@ export class ReportUseCase implements IReportUseCase {
                             churnRateData.push(monthlyData[key].churnRate)
                         })
                 
-                        // Preparar objeto para enviar ao front-end
                         const combinedData = monthyData.map((label, index) => ({
                             date: label,
                             mrr: mrrData[index],
