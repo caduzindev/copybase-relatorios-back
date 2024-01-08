@@ -1,3 +1,6 @@
+import { MetricsReport } from "./dtos";
+
 export interface IReportUseCase {
-    requestReport(fileContent: ReadableStream): Promise<void>;
+    requestReport(filePath: string): Promise<void>;
+    processReport(filePath: string): Promise<MetricsReport>;
 }
