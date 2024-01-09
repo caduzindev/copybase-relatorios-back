@@ -16,15 +16,15 @@ export class ReportUseCase implements IReportUseCase {
 
     async requestReport(filePath: string): Promise<void> {
         const reportToSave = new Report({
-            fileName: 'random',
+            filePath,
             status: StatusReport.PROCESSING,
         })
         const saved = await this.reportRepository.save(reportToSave);
 
         const sendToQueue = {
             reportId: saved.id,
-            filePath
         }
+
         await this.queue.enqueue(TargetQueue.REQUEST_REPORT, sendToQueue);
     }
 

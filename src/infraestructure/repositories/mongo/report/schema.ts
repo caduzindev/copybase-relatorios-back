@@ -2,13 +2,13 @@ import mongoose, { Schema } from "mongoose";
 
 export interface IReportMongo {
     _id: string;
-    fileName: string;
+    filePath: string;
     status: number;
     result?: string;
 }
 
 const ReportSchemaMongo = new Schema<IReportMongo>({
-    fileName: {
+    filePath: {
         type: String,
         required: true,
     },

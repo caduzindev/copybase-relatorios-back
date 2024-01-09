@@ -1,6 +1,10 @@
+import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import router from './presentation/routes/index'
+import mongoose from 'mongoose';
+import { databaseMongoInit } from './database';
+
 const app = express()
 
 app.use(express.json())
@@ -20,5 +24,16 @@ app.use('/', (req, res) => {
     }
 });
 
-const porta = process.env.PORT || 3005;
-app.listen(porta, () => console.log('Server is running'));
+const port = process.env.PORT || 3005;
+
+async function main() {
+    console.log('MongoDB connect')
+    await databaseMongoInit();
+
+    console.log('Up server')
+    app.listen(port, () => console.log('Server is running'));
+    
+    console.log('All ready !!')
+}
+
+main()
