@@ -1,7 +1,5 @@
 import multer from 'multer'
 import { resolve } from 'path'
-import { Request, Response, NextFunction } from 'express'
-import { HttpRequestDTO } from '../dtos/http'
 
 const rootDirectory = resolve(__dirname,'..','..','..')
 
@@ -11,41 +9,14 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-        cb(null, file.fieldname + '-' + uniqueSuffix)
+        var extension = file.originalname.substr(file.originalname.lastIndexOf("."));
+        cb(null, file.fieldname + '-' + uniqueSuffix + extension)
     }
 })
 
 export class ExpressMulterAdapter {
-    static adapt(middleware: any, method: string) {
-      const upload = multer({ storage }).single('file');
-  
-      return async (request: Request, response: Response, next: NextFunction) => {
-        upload(request, response, (err: any) => {
-          if (err) {
-            return response.status(400).json({ error: err.message });
-          }
-        });
-
-        const httpRequest: HttpRequestDTO = {
-            body: request.body,
-            params: request.params,
-            headers: request.headers,
-            file: {
-                path: request.file?.path as string
-            }
-        };
-
-        const httpResponse = await middleware[method](httpRequest);
-        if (httpResponse === null) {
-            return next();
-        }
-
-        if(httpResponse && typeof httpResponse.statusCode == 'undefined'){
-            request.body = httpResponse;
-            return next();
-        }
-
-        response.status(httpResponse.statusCode).json(httpResponse.body);
-      };
+    static adapt(field: string) {
+      const upload = multer({ storage });
+      return upload.single(field);
     }
   }
