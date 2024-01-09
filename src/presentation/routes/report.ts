@@ -10,4 +10,6 @@ report.post('/v1/request',
     ExpressMiddlewareAdapter.adapt(reportController, 'requestReport')
 )
 
+report.get('/v1/list', ExpressMiddlewareAdapter.adapt(reportController, 'list'))
+
 export default report;

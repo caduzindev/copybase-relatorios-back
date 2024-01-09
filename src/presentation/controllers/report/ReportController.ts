@@ -16,7 +16,24 @@ export class ReportController implements IReportController {
             console.log(error)
             return {
                 statusCode: 500,
-                body: ''
+                body: 'Erro no Servidor'
+            }
+        }
+    }
+
+    async list(request: HttpRequestDTO): Promise<HttpResponseDTO> {
+        try {
+            const query = request.query;
+            const reports = await this.reportUseCase.list(query.page, query)
+            return {
+                statusCode: 200,
+                body: reports
+            }
+        } catch(error: any) {
+            console.log(error)
+            return {
+                statusCode: 500,
+                body: 'Erro no Servidor'
             }
         }
     }

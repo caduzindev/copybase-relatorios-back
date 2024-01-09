@@ -9,6 +9,13 @@ export const mapperToDB = <T>(report: Report<T>): Omit<IReportMongo, '_id'> => {
     }
 }
 
+export const mapperToFilter = <T>(report: Report<T>): Partial<IReportMongo> => {
+    return {
+        ...(report.filePath && { filePath: report.filePath }),
+        ...(report.status && { status: report.status }),
+    }
+}
+
 export const mapperDbToReport = <T>(reportMongo: IReportMongo): Report<T> => {
     return {
         id: reportMongo._id,
@@ -16,4 +23,8 @@ export const mapperDbToReport = <T>(reportMongo: IReportMongo): Report<T> => {
         status: reportMongo.status,
         ...(reportMongo.result && { resultProcess: reportMongo.result && JSON.parse(reportMongo.result) })
     }
+}
+
+export const mapperDbToReportCollection = <T>(reportsMongo: IReportMongo[]): Report<T>[] => {
+    return reportsMongo.map(reportMongo => mapperDbToReport(reportMongo))
 }

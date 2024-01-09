@@ -7,6 +7,7 @@ export class ExpressMiddlewareAdapter {
             const httpRequest: HttpRequestDTO = {
                 body: request.body,
                 params: request.params,
+                query: request.query,
                 headers: request.headers,
                 ...(request.file && { 
                     file: {

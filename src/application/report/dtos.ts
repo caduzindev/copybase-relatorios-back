@@ -1,3 +1,6 @@
+import { Report } from "../../domain/entities/report/Report";
+import { StatusReport } from "../../domain/enum/report/StatusReport";
+
 export interface MetricsReport {
     mrr: {
         months: string[],
@@ -12,4 +15,15 @@ export interface MetricsReport {
 export interface MetricsReportError {
     reason: string;
     error: true
+}
+
+export interface ReportListFilter {
+    status?: StatusReport,
+}
+
+export type ReportMetricResult = MetricsReport | MetricsReportError
+export interface ReportReturnPagination {
+    data: Report<ReportMetricResult>[];
+    currentPage: number;
+    totalPages: number;
 }

@@ -1,6 +1,6 @@
 import { Report } from "../../../../domain/entities/report/Report";
 import { IReportRepository } from "../../../../domain/repositories/report/IReportRepository";
-import { mapperToDB, mapperDbToReport } from "./mapper";
+import { mapperToDB, mapperDbToReport, mapperDbToReportCollection, mapperToFilter } from "./mapper";
 import { ReportModel } from "./schema";
 
 export class ReportRepositoryMongo implements IReportRepository {
@@ -21,5 +21,24 @@ export class ReportRepositoryMongo implements IReportRepository {
     async update<T>(reportId: string, report: Report<T>): Promise<void> {
         const reportToDb = mapperToDB(report);
         await ReportModel.updateOne({ _id: reportId }, reportToDb )
+    }
+
+    async list<T>(page: number, filter: Report<T>, limit: number = 10): Promise<Report<T>[]> {
+        const reportToDb = mapperToFilter(filter);
+
+        const indexStart = (page - 1) * limit
+        const reports = await ReportModel.find(reportToDb)
+            .limit(limit)
+            .skip(indexStart)
+
+        return mapperDbToReportCollection(reports)
+    }
+
+    async count<T>(filter?: Report<T>): Promise<number> {
+        if (filter){
+            const reportToDb = mapperToFilter(filter)
+            return ReportModel.countDocuments(reportToDb)
+        }
+        return ReportModel.countDocuments()
     }
 }

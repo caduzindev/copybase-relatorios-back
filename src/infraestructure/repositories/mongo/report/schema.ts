@@ -17,6 +17,6 @@ const ReportSchemaMongo = new Schema<IReportMongo>({
         required: true
     },
     result: String
-})
+}, { timestamps: true })
 
 export const ReportModel = mongoose.model<IReportMongo>('Report', ReportSchemaMongo);

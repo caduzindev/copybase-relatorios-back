@@ -1,7 +1,8 @@
 export interface HttpRequestDTO{
     params?: any,
     body?: any,
-    headers?: any
+    headers?: any,
+    query?: any,
     file?: {
         path: string
     }

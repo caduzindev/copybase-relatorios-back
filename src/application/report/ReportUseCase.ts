@@ -3,7 +3,7 @@ import { IReportUseCase } from "./IReportUseCase";
 import { IReportRepository } from "../../domain/repositories/report/IReportRepository"
 import { Report } from "../../domain/entities/report/Report";
 import { StatusReport } from "../../domain/enum/report/StatusReport";
-import { MetricsReport, MetricsReportError } from "./dtos";
+import { MetricsReport, MetricsReportError, ReportListFilter, ReportMetricResult, ReportReturnPagination } from "./dtos";
 import { IConverter } from "../ports/IConverter";
 import { IDate } from "../ports/IDate";
 import { BusinessError } from "../../errors/BusinessError";
@@ -139,5 +139,23 @@ export class ReportUseCase implements IReportUseCase {
                     }
                 })
         })
+    }
+
+    async list(page: number, filter: ReportListFilter): Promise<ReportReturnPagination> {
+        const reportFilter = {} as Report<ReportMetricResult>
+        const limit = 10;
+
+        if (filter.status) {
+            reportFilter.status = filter.status;
+        }
+
+        const reports = await this.reportRepository.list(page || 1, reportFilter, limit);
+        const totalReports = await this.reportRepository.count(reportFilter);
+
+        return {
+            data: reports,
+            currentPage: page || 1,
+            totalPages: Math.ceil(totalReports / limit) || 1
+        }
     }
 }

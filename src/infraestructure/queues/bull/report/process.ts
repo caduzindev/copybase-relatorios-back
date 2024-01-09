@@ -4,7 +4,6 @@ import { reportQueue } from "./queue";
 export const reportProcess = (reportUseCase: IReportUseCase) =>{
     return () => {
         reportQueue.process(function(job,done) {
-            console.log(job)
             const reportId = job.data.reportId as string;
             reportUseCase.processReport(reportId)
                 .then(() => done())
