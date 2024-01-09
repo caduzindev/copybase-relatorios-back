@@ -8,3 +8,8 @@ export interface MetricsReport {
         values: number[]
     },
 }
+
+export interface MetricsReportError {
+    reason: string;
+    error: true
+}

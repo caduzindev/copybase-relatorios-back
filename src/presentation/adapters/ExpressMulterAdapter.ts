@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 
 export class ExpressMulterAdapter {
     static adapt(field: string) {
-      const upload = multer({ storage });
-      return upload.single(field);
+        const upload = multer({ storage });
+        return upload.single(field);
     }
-  }
+}

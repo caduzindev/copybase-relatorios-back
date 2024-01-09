@@ -3,7 +3,7 @@ import { IReportUseCase } from "./IReportUseCase";
 import { IReportRepository } from "../../domain/repositories/report/IReportRepository"
 import { Report } from "../../domain/entities/report/Report";
 import { StatusReport } from "../../domain/enum/report/StatusReport";
-import { MetricsReport } from "./dtos";
+import { MetricsReport, MetricsReportError } from "./dtos";
 import { IConverter } from "../ports/IConverter";
 import { IDate } from "../ports/IDate";
 import { BusinessError } from "../../errors/BusinessError";
@@ -29,17 +29,16 @@ export class ReportUseCase implements IReportUseCase {
         await this.queue.enqueue(TargetQueue.REQUEST_REPORT, sendToQueue);
     }
 
-    async processReport(reportId: string): Promise<MetricsReport> {
+    async processReport(reportId: string): Promise<void> {
         let data: any = []
         const report = await this.reportRepository.findById(reportId);
         if (!report) throw new BusinessError(`Relatorio ${reportId} não encontrado`)
 
         const streamJson = this.converter.csvToJsonStream(report.filePath)
-
         return new Promise((resolve, reject) => {
             streamJson
-                .on('data', (data) => data.push(data))
-                .on('end', () => {
+                .on('data', (chunk) => data.push(chunk))
+                .on('end', async () => {
                     try {
                         const monthlyData: Record<string, {
                             MRR: number,
@@ -109,7 +108,7 @@ export class ReportUseCase implements IReportUseCase {
                             resultChurnRate.push(item.churnRate * 100)
                         })
                         
-                        resolve({
+                        const resultProcess: MetricsReport = {
                             mrr: {
                                 months: labels,
                                 values: resultMrr,
@@ -117,10 +116,25 @@ export class ReportUseCase implements IReportUseCase {
                             churnRate: {
                                 months: labels,
                                 values: resultChurnRate,
-                            },
-                        });
-                    } catch(err) {
+                            }
+                        }
+
+                        await this.reportRepository.update(reportId, {
+                            status: StatusReport.DONE,
+                            resultProcess 
+                        })
+
+                        resolve()
+                    } catch(err: any) {
                         console.log(err)
+                        const resultProcess: MetricsReportError = {
+                            error: true,
+                            reason: err.message as string
+                        }
+                        await this.reportRepository.update(reportId, {
+                            status: StatusReport.ERROR, 
+                            resultProcess
+                        })
                         reject(err)
                     }
                 })

@@ -17,4 +17,9 @@ export class ReportRepositoryMongo implements IReportRepository {
         }
         return null;
     }
+
+    async update<T>(reportId: string, report: Report<T>): Promise<void> {
+        const reportToDb = mapperToDB(report);
+        await ReportModel.updateOne({ _id: reportId }, reportToDb )
+    }
 }
