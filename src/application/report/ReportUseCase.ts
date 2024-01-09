@@ -6,6 +6,7 @@ import { StatusReport } from "../../domain/enum/report/StatusReport";
 import { MetricsReport } from "./dtos";
 import { IConverter } from "../ports/IConverter";
 import { IDate } from "../ports/IDate";
+import { BusinessError } from "../../errors/BusinessError";
 export class ReportUseCase implements IReportUseCase {
     constructor(
         private readonly queue: IQueue,
@@ -28,9 +29,12 @@ export class ReportUseCase implements IReportUseCase {
         await this.queue.enqueue(TargetQueue.REQUEST_REPORT, sendToQueue);
     }
 
-    async processReport(filePath: string): Promise<MetricsReport> {
+    async processReport(reportId: string): Promise<MetricsReport> {
         let data: any = []
-        const streamJson = this.converter.csvToJsonStream(filePath)
+        const report = await this.reportRepository.findById(reportId);
+        if (!report) throw new BusinessError(`Relatorio ${reportId} não encontrado`)
+
+        const streamJson = this.converter.csvToJsonStream(report.filePath)
 
         return new Promise((resolve, reject) => {
             streamJson

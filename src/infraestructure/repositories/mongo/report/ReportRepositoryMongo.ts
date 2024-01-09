@@ -9,4 +9,12 @@ export class ReportRepositoryMongo implements IReportRepository {
         const saved = await ReportModel.create(reportToDb);
         return mapperDbToReport(saved);
     }
+
+    async findById<T>(reportId: string): Promise<Report<T> | null> {
+        const reportDb = await ReportModel.findById(reportId);
+        if (reportDb) {
+            return mapperDbToReport(reportDb)
+        }
+        return null;
+    }
 }

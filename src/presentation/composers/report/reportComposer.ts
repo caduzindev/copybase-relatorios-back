@@ -4,6 +4,7 @@ import { QueueManagerBull } from '../../../infraestructure/queues/bull/QueueMang
 import { ReportRepositoryMongo } from '../../../infraestructure/repositories/mongo/report/ReportRepositoryMongo'
 import { Converter } from '../../../utils/Converter'
 import { DateFns } from '../../../utils/date/DateFns'
+import { reportProcess } from "../../../infraestructure/queues/bull/report/process";
 
 const dateManager = new DateFns()
 const converter = new Converter()
@@ -16,5 +17,6 @@ const reportUseCase = new ReportUseCase(
     dateManager
 )
 const reportController = new ReportController(reportUseCase);
+const reportListenerQueue = reportProcess(reportUseCase);
 
-export { reportController }
+export { reportController, reportListenerQueue }
