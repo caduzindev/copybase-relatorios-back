@@ -2,15 +2,14 @@ import 'dotenv/config'
 import express from 'express'
 import cors from 'cors'
 import router from './presentation/routes/index'
-import mongoose from 'mongoose';
 import { databaseMongoInit } from './database';
 import { initializeListeners } from './infraestructure/queues/bull';
 
 const app = express()
 
 app.use(express.json())
-app.use(router)
 app.use(cors())
+app.use(router)
 app.use('/', (req, res) => {
     const healthcheck = {
         uptime: process.uptime(),
