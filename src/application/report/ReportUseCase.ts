@@ -15,9 +15,10 @@ export class ReportUseCase implements IReportUseCase {
         private readonly dateManager: IDate,
     ) {}
 
-    async requestReport(filePath: string): Promise<void> {
+    async requestReport(filePath: string, fileName: string): Promise<void> {
         const reportToSave = new Report({
             filePath,
+            fileName,
             status: StatusReport.PROCESSING,
         })
         const saved = await this.reportRepository.save(reportToSave);

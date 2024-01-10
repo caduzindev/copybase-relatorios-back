@@ -7,7 +7,8 @@ export class ReportController implements IReportController {
     async requestReport(request: HttpRequestDTO): Promise<HttpResponseDTO> {
         try {
             const filePath = request.file?.path as string;
-            await this.reportUseCase.requestReport(filePath);
+            const fileName = request.file?.name as string;
+            await this.reportUseCase.requestReport(filePath, fileName);
             return {
                 statusCode: 200,
                 body: 'Arquivo enviado com sucesso!'

@@ -11,7 +11,8 @@ export class ExpressMiddlewareAdapter {
                 headers: request.headers,
                 ...(request.file && { 
                     file: {
-                        path: request.file.path
+                        path: request.file.path,
+                        name: request.file.originalname
                     } 
                 })
             };            

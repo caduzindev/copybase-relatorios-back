@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 export interface IReportMongo {
     _id: string;
     filePath: string;
+    fileName: string;
     status: number;
     result?: string;
 }
@@ -11,6 +12,10 @@ const ReportSchemaMongo = new Schema<IReportMongo>({
     filePath: {
         type: String,
         required: true,
+    },
+    fileName: {
+        type: String,
+        required: true
     },
     status: {
         type: Number,
