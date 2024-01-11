@@ -30,6 +30,7 @@ export class ReportRepositoryMongo implements IReportRepository {
         const reports = await ReportModel.find(reportToDb)
             .limit(limit)
             .skip(indexStart)
+            .sort([['createdAt', 'desc']])
 
         return mapperDbToReportCollection(reports)
     }

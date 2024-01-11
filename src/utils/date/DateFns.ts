@@ -1,9 +1,13 @@
 import { IDate } from "../../application/ports/IDate";
-import { format, getMonth, getYear, parse } from 'date-fns';
+import { getMonth, getYear } from 'date-fns';
 
 export class DateFns implements IDate {
-    convertToFormat(date: string, forConvert: string, toFormat: string): string {
-        return format(parse(date, forConvert, new Date()), toFormat)
+    convertToDate(date: string): Date {
+        return new Date(date);
+    }
+
+    convertToDateMilliseconds(date: string): number {
+        return new Date(date).getTime();
     }
 
     getMonth(date: Date | string): string {
