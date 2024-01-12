@@ -1,3 +1,4 @@
+import { ReportFileStructurePeriody, ReportFileStructureStatus } from "../../enum/report/ReportFileStructure";
 import { StatusReport } from "../../enum/report/StatusReport";
 
 export class Report<T> {
@@ -14,4 +15,20 @@ export class Report<T> {
         this.status = report.status;
         this.resultProcess = report.resultProcess;
     }
+
+    static calcMrr(reportFileStructure: ReportFileStructure) {
+        return reportFileStructure.periody === ReportFileStructurePeriody.YEARLY 
+            ? reportFileStructure.amount / 12 
+            : reportFileStructure.amount
+    }
+}
+
+export interface ReportFileStructure {
+    startDate: string;
+    cancelDate: string;
+    lastStatusDate: string;
+    amount: number;
+    quantityOfCharges: number;
+    periody: ReportFileStructurePeriody;
+    status: ReportFileStructureStatus
 }

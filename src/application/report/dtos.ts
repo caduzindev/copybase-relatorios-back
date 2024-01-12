@@ -27,3 +27,10 @@ export interface ReportReturnPagination {
     currentPage: number;
     totalPages: number;
 }
+
+export type ProcessReportAllReturn = Record<string, {
+    MRR: number,
+    churnRate: number,
+    activeSubscriptions: number,
+    canceledSubscriptions: number,
+}>

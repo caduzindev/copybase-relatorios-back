@@ -1,5 +1,5 @@
 import { IDate } from "../../application/ports/IDate";
-import { getMonth, getYear } from 'date-fns';
+import { addMonths, differenceInMonths, getMonth, getYear, subMonths } from 'date-fns';
 
 export class DateFns implements IDate {
     convertToDate(date: string): Date {
@@ -18,11 +18,23 @@ export class DateFns implements IDate {
         }
     }
 
+    plusMonthsToJsDate(date: Date, months: number): Date {
+        return addMonths(date, months);
+    }
+
+    minusMonthsToJsDate(date: Date, months: number): Date {
+        return subMonths(date, months);
+    }
+
     getYear(date: string | Date): string {
         if (typeof date === 'string') {
             return (getYear(date)).toString();
         } else {
             return getYear(new Date(date)).toString();
         }
+    }
+
+    differenceMonthsBetweenDates(left: Date, right: Date): number {
+        return Math.abs(differenceInMonths(left,right))
     }
 }

@@ -1,12 +1,13 @@
 import { IQueue, TargetQueue } from "../ports/IQueue";
 import { IReportUseCase } from "./IReportUseCase";
 import { IReportRepository } from "../../domain/repositories/report/IReportRepository"
-import { Report } from "../../domain/entities/report/Report";
+import { Report, ReportFileStructure } from "../../domain/entities/report/Report";
 import { StatusReport } from "../../domain/enum/report/StatusReport";
-import { MetricsReport, MetricsReportError, ReportListFilter, ReportMetricResult, ReportReturnPagination } from "./dtos";
+import { MetricsReport, MetricsReportError, ProcessReportAllReturn, ReportListFilter, ReportMetricResult, ReportReturnPagination } from "./dtos";
 import { IConverter } from "../ports/IConverter";
 import { IDate } from "../ports/IDate";
 import { BusinessError } from "../../errors/BusinessError";
+import { ReportFileStructurePeriody, ReportFileStructureStatus } from "../../domain/enum/report/ReportFileStructure";
 export class ReportUseCase implements IReportUseCase {
     constructor(
         private readonly queue: IQueue,
@@ -31,130 +32,59 @@ export class ReportUseCase implements IReportUseCase {
     }
 
     async processReport(reportId: string): Promise<void> {
-        let data: any = []
         try {
             const report = await this.reportRepository.findById(reportId);
             if (!report) throw new BusinessError(`Relatorio ${reportId} não encontrado`)
 
-            const streamJson = this.converter.csvToJsonStream(report.filePath)
-            return new Promise((resolve, reject) => {
-                streamJson
-                    .on('data', (chunk) => data.push(chunk))
-                    .on('end', async () => {
-                        try {
-                            const monthlyData: Record<string, {
-                                MRR: number,
-                                churnRate: number,
-                                activeSubscriptions: number,
-                                canceledSubscriptions: number
-                            }> = {};
-                            data.forEach((row) => {
-                                const convertDate = this.dateManager.convertToDate(row['data início'])
-                                const year = this.dateManager.getYear(convertDate)
-                                const month = this.dateManager.getMonth(convertDate);
+            const rows = await this.converter.csvToReportFileStructure(report.filePath);
+            const resultReport = this.processReportAllReport(rows)
+    
+            const monthyData = Object.keys(resultReport);
+            let mrrData: number[] = []
+            let churnRateData: number[] = []
+    
+            monthyData.forEach((key) => {
+                mrrData.push(resultReport[key].MRR)
+                churnRateData.push(resultReport[key].churnRate)
+            })
+    
+            const combinedData = monthyData.map((label, index) => ({
+                date: label,
+                mrr: mrrData[index],
+                churnRate: churnRateData[index]
+            }));
+
+            combinedData.sort((a, b) => {
+                const left = this.dateManager.convertToDateMilliseconds(a.date);
+                const right = this.dateManager.convertToDateMilliseconds(b.date);
+
+                return left - right
+            });
+    
+            let labels: string[] = []
+            let resultMrr: number[] = []
+            let resultChurnRate: number[] = []
+    
+            combinedData.forEach(item => {
+                labels.push(item.date)
+                resultMrr.push(item.mrr)
+                resultChurnRate.push(item.churnRate * 100)
+            })
             
-                                const key = `${year}-${month}`;
-                                if (!monthlyData[key]) {
-                                    monthlyData[key] = {
-                                        MRR: 0,
-                                        churnRate: 0,
-                                        activeSubscriptions: 0,
-                                        canceledSubscriptions: 0,
-                                    };
-                                }
-                        
-                                const value = parseFloat(row['valor'].replace(',', '')) || 0;
-                                const amountOfCharges = parseInt(row['quantidade cobranças']) || 1;
-                                const mrr = value * amountOfCharges;
-                        
-                                monthlyData[key].MRR += row['periodicidade'] === 'Anual' ? mrr / 12 : mrr;
-                        
-                                if (row['status'] === 'Ativa' || row['status'] === 'Upgrade') {
-                                    monthlyData[key].activeSubscriptions++;
-                                } else if (row['status'] === 'Cancelada' || row['status'] === 'Trial cancelado') {
-                                    const convertDate = this.dateManager.convertToDate(row['data cancelamento'])
-                                    const cancelYear = this.dateManager.getYear(convertDate);
-                                    const cancelMonth = this.dateManager.getMonth(convertDate);
-                                    const cancelKey = `${cancelYear}-${cancelMonth}`;
-                                    if (!monthlyData[cancelKey]) {
-                                        monthlyData[cancelKey] = {
-                                            MRR: 0,
-                                            churnRate: 0,
-                                            activeSubscriptions: 0,
-                                            canceledSubscriptions: 0,
-                                        };
-                                    }
-                                    monthlyData[key].canceledSubscriptions++;
-                                }
-                            });
-            
-                            Object.keys(monthlyData).forEach((key) => {
-                                const { canceledSubscriptions,activeSubscriptions } = monthlyData[key];
-                                monthlyData[key].churnRate = canceledSubscriptions / activeSubscriptions;
-                            });
-                    
-                            const monthyData = Object.keys(monthlyData);
-                            let mrrData: number[] = []
-                            let churnRateData: number[] = []
-                    
-                            monthyData.forEach((key) => {
-                                mrrData.push(monthlyData[key].MRR)
-                                churnRateData.push(monthlyData[key].churnRate)
-                            })
-                    
-                            const combinedData = monthyData.map((label, index) => ({
-                                date: label,
-                                mrr: mrrData[index],
-                                churnRate: churnRateData[index]
-                            }));
+            const resultProcess: MetricsReport = {
+                mrr: {
+                    months: labels,
+                    values: resultMrr,
+                },
+                churnRate: {
+                    months: labels,
+                    values: resultChurnRate,
+                }
+            }
 
-                            combinedData.sort((a, b) => {
-                                const left = this.dateManager.convertToDateMilliseconds(a.date);
-                                const right = this.dateManager.convertToDateMilliseconds(b.date);
-
-                                return left - right
-                            });
-                    
-                            let labels: string[] = []
-                            let resultMrr: number[] = []
-                            let resultChurnRate: number[] = []
-                    
-                            combinedData.forEach(item => {
-                                labels.push(item.date)
-                                resultMrr.push(item.mrr)
-                                resultChurnRate.push(item.churnRate * 100)
-                            })
-                            
-                            const resultProcess: MetricsReport = {
-                                mrr: {
-                                    months: labels,
-                                    values: resultMrr,
-                                },
-                                churnRate: {
-                                    months: labels,
-                                    values: resultChurnRate,
-                                }
-                            }
-
-                            await this.reportRepository.update(reportId, {
-                                status: StatusReport.DONE,
-                                resultProcess 
-                            })
-
-                            resolve()
-                        } catch(err: any) {
-                            console.log(err)
-                            const resultProcess: MetricsReportError = {
-                                error: true,
-                                reason: err.message as string
-                            }
-                            await this.reportRepository.update(reportId, {
-                                status: StatusReport.ERROR, 
-                                resultProcess
-                            })
-                            reject(err)
-                        }
-                    })
+            await this.reportRepository.update(reportId, {
+                status: StatusReport.DONE,
+                resultProcess 
             })
         } catch(err: any) {
             console.log(err)
@@ -166,8 +96,69 @@ export class ReportUseCase implements IReportUseCase {
                 status: StatusReport.ERROR, 
                 resultProcess
             })
-            throw err;
         }
+    }
+    private processReportAllReport(rows: ReportFileStructure[]): ProcessReportAllReturn{
+        const monthlyData: Record<string, {
+            MRR: number,
+            churnRate: number,
+            activeSubscriptions: number,
+            canceledSubscriptions: number,
+        }> = {};
+        const monthLabels: string[] = []
+
+        rows.forEach((row: ReportFileStructure) => {
+            const convertStartDate = this.dateManager.convertToDate(row.startDate);
+            const convertLastStatusDate = this.dateManager.convertToDate(row.lastStatusDate);
+
+            const quantityOfCharges = row.periody === ReportFileStructurePeriody.YEARLY
+                ? this.dateManager.differenceMonthsBetweenDates(convertStartDate, convertLastStatusDate)
+                : row.quantityOfCharges
+            
+            for (let quantity = 0;quantity <= quantityOfCharges;quantity++) {
+                const plusOneMonthDate = this.dateManager.plusMonthsToJsDate(convertStartDate, quantity);
+                const dateKey = this.generateKeyPerDate(plusOneMonthDate)
+                const amount = row.amount;
+                const mrr = row.periody === ReportFileStructurePeriody.YEARLY 
+                    ? amount / 12
+                    : amount;
+                if (!monthlyData[dateKey]) {
+                    monthlyData[dateKey] = {
+                        MRR: 0,
+                        churnRate: 0,
+                        activeSubscriptions: 0,
+                        canceledSubscriptions: 0,
+                    };
+                    monthLabels.push(dateKey)
+                }
+
+                monthlyData[dateKey].MRR += mrr;
+
+                if (row.status === ReportFileStructureStatus.ACTIVE) {
+                    monthlyData[dateKey].activeSubscriptions++;
+                }
+            }
+
+            if (row.status === ReportFileStructureStatus.CANCELED) {
+                const convertCancelDate = this.dateManager.convertToDate(row.cancelDate);
+                const dateKey = this.generateKeyPerDate(convertCancelDate)
+                monthlyData[dateKey].canceledSubscriptions++
+            }
+        });
+
+        monthLabels.forEach((month) => {
+            const actualMonth = monthlyData[month]
+            monthlyData[month].churnRate = actualMonth.canceledSubscriptions / actualMonth.activeSubscriptions
+        });
+
+        return monthlyData
+    }
+    private generateKeyPerDate(date: Date): string {
+        const year = this.dateManager.getYear(date)
+        const month = this.dateManager.getMonth(date);
+
+        const key = `${year}-${month}`;
+        return key;
     }
 
     async list(page: number, filter: ReportListFilter): Promise<ReportReturnPagination> {
