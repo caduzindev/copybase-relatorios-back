@@ -1,4 +1,6 @@
 import { IReportUseCase } from "../../../application/report/IReportUseCase";
+import { HttpResponse } from "../../../helpers/HttpResponse.";
+import { MapperHttpError } from "../../../helpers/MapperHttpError";
 import { HttpRequestDTO, HttpResponseDTO } from "../../dtos/http";
 import { IReportController } from "./IReportController";
 
@@ -15,10 +17,8 @@ export class ReportController implements IReportController {
             }
         } catch(error: any) {
             console.log(error)
-            return {
-                statusCode: 500,
-                body: 'Erro no Servidor'
-            }
+            const httpError = MapperHttpError.toHttpResponse(error);
+            return httpError;
         }
     }
 
@@ -26,16 +26,11 @@ export class ReportController implements IReportController {
         try {
             const query = request.query;
             const reports = await this.reportUseCase.list(query.page, query)
-            return {
-                statusCode: 200,
-                body: reports
-            }
+            return HttpResponse.ok(reports)
         } catch(error: any) {
             console.log(error)
-            return {
-                statusCode: 500,
-                body: 'Erro no Servidor'
-            }
+            const httpError = MapperHttpError.toHttpResponse(error);
+            return httpError;
         }
     }
 }
