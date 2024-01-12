@@ -39,7 +39,7 @@ export class Converter implements IConverter{
                     }
                     
                     if (!row['data início']) {
-                        reject(new InvalidParams(`Obrigatorio informar Data inicial para ${row['ID assinante']}`))
+                        reject(new InvalidParams(`Obrigatorio informar Data inicial para assinante${row['ID assinante']}`))
                         return;
                     }
                     const startDateIsInvalid = isNaN(new Date(row['data início']).getDate())
