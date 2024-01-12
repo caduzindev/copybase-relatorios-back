@@ -29,6 +29,7 @@ export class Converter implements IConverter{
     
                     const active = activeStatus.includes(row['status'].toUpperCase().trim())
                     const canceled = canceledStatus.includes(row['status'].toUpperCase().trim())
+
                     let status;
                     if (active) status = ReportFileStructureStatus.ACTIVE
                     if (canceled) status = ReportFileStructureStatus.CANCELED
@@ -36,7 +37,22 @@ export class Converter implements IConverter{
                         reject(new InvalidParams(`Status invalido para assinante ${row['ID assinante']}`))
                         return;
                     }
-    
+                    
+                    if (!row['data início']) {
+                        reject(new InvalidParams(`Obrigatorio informar Data inicial para ${row['ID assinante']}`))
+                        return;
+                    }
+                    const startDateIsInvalid = isNaN(new Date(row['data início']).getDate())
+                    if(startDateIsInvalid) {
+                        reject(new InvalidParams(`Data Inicial invalido para assinante ${row['ID assinante']}`))
+                        return;
+                    }
+                    const cancelDateIsInvalid = isNaN(new Date(row['data cancelamento']).getDate())
+                    if(row['data cancelamento'] && cancelDateIsInvalid) {
+                        reject(new InvalidParams(`Data de cancelamento invalida para assinante ${row['ID assinante']}`))
+                        return;
+                    }
+
                     const reportFileStructure: ReportFileStructure = {
                         startDate: row['data início'],
                         amount: amount,
