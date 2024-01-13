@@ -23,7 +23,6 @@ Este e o backend do projeto, onde oferece uma api para importar arquivos csv e l
 ## Como Rodar o Projeto
 
 ### Pré-requisitos
-- NodeJS (preferivel versões mais atuais)
 - Docker + Docker-Compose
 
 ### Configuração
