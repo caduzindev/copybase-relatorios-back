@@ -43,3 +43,8 @@ localhost:3005 -> API backend
 
 # Para parar de rodar, na raiz do projeto
 docker-compose down
+```
+
+### Melhorias que eu faria
+- TDD e Testes Funcionais
+- Swagger
