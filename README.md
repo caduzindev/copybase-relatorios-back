@@ -40,3 +40,6 @@ docker-compose up -d
 # Portas acessiveis
 localhost:8081 -> Mongo Express
 localhost:3005 -> API backend
+
+# Para parar de rodar, na raiz do projeto
+docker-compose down
