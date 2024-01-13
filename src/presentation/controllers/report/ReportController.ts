@@ -11,10 +11,7 @@ export class ReportController implements IReportController {
             const filePath = request.file?.path as string;
             const fileName = request.file?.name as string;
             await this.reportUseCase.requestReport(filePath, fileName);
-            return {
-                statusCode: 200,
-                body: 'Arquivo enviado com sucesso!'
-            }
+            return HttpResponse.ok('Arquivo enviado com sucesso!')
         } catch(error: any) {
             console.log(error)
             const httpError = MapperHttpError.toHttpResponse(error);
