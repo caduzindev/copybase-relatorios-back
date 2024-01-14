@@ -13,6 +13,7 @@ Este e o backend do projeto, onde oferece uma api para importar arquivos csv e l
 - **Redis**: Banco de dados chave valor NoSQL que opera em memoria
 - **MongoDB**: Banco de dados NoSQL que opera com documentos
 - **Docker + Docker-Compose**: Para simular um ambiente de desenvolvimento
+- **Swagger**: Para documentar rotas da API
 
 ## Padrões
 - **Clean Architecture**: Arquitetura limpa e desacoplada que permite a não dependencia de qualquer lib ou agente externo
