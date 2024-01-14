@@ -1,0 +1,193 @@
+tags:
+  name: API Copybase relatorios
+  description: Rotas e exemplos de chamadas dos enpoints contidos no serviço  
+
+components:
+  schemas:
+    MetricsReport:
+      type: object
+      properties:
+        mrr: 
+          schema: object
+          properties:
+            months:
+              type: array
+              items:
+                type: string
+            values:
+              type: array
+              items:
+                type: number
+        churnRate: 
+          schema: object
+          properties:
+            months:
+              type: array
+              items:
+                type: string
+            values:
+              type: array
+              items:
+                type: number
+    MetricsReportError:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: A razão do erro
+        error: 
+          type: boolean
+          description: Se houve erro ou não (melhora o controle do front)
+    Report:
+      type: object
+      properties:
+        id: 
+          type: string
+          description: ID do relatorio
+        filePath:
+          type: string
+          description: Path completo do arquivo
+        fileName:
+          type: string
+          description: Nome completo do arquivo
+        status:
+          type: integer
+          description: Status do arquivo -> 1=Processando,2=Pronto,3=Erro
+        resultProcess:
+          oneOf:
+            - $ref: '#/components/schemas/MetricsReport'
+            - $ref: '#/components/schemas/MetricsReportError'
+    ResponseListReport:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/ResponseListReport"
+        currentPage:
+          type: number
+          description: Pagina atual da listagem
+        totalPages:
+          type: number
+          description: Total de paginas
+
+/report/v1/request:
+  post:
+    summary: Envie um arquivo (relatorios csv)
+    tags: [Report]
+    requetBody:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              uploadReport:
+                type: string
+                format: binary
+    responses:
+      '200':
+        description: 'Arquivo enviado com sucesso!'
+
+/report/v1/list:
+  get:
+    summary: Listar relatorios importados
+    tags: [Report]
+    parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+        required: true
+        description: Numero da pagina a qual quer listar
+      - in: query
+        name: status
+        schema:
+          type: interger
+          description: 1=Processando,2=Pronto,3=Erro
+        required: false
+        description: Status dos arquivos que voce quer processar
+    responses:
+      '200':
+        description: Lista relatorios importados
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ResponseListReport"
+            example:
+              {
+                data: [
+                    {
+                        id: "65a434a4783134c8e41ed515",
+                        filePath: "/app/static/uploadReport-1705260196705-819457193.csv",
+                        fileName: "modelo-teste-full-stack.xlsx - Sheet1.csv",
+                        status: 2,
+                        resultProcess: {
+                            mrr: {
+                                months: [
+                                    "2022-1",
+                                    "2022-2",
+                                    "2022-3",
+                                    "2022-4",
+                                    "2022-5",
+                                    "2022-6",
+                                    "2022-7",
+                                    "2022-8",
+                                    "2022-9",
+                                    "2022-10",
+                                    "2022-11",
+                                    "2022-12",
+                                    "2023-1"
+                                ],
+                                values: [
+                                    59007.35333333331,
+                                    74571.2766666666,
+                                    67371.08499999995,
+                                    57877.409999999996,
+                                    56309.97166666667,
+                                    56410.409999999996,
+                                    54193.82999999999,
+                                    53972.44083333332,
+                                    55289.06999999996,
+                                    51600.01249999996,
+                                    57886.72083333332,
+                                    42983.089999999975,
+                                    730.03
+                                ]
+                            },
+                            churnRate: {
+                                months: [
+                                    "2022-1",
+                                    "2022-2",
+                                    "2022-3",
+                                    "2022-4",
+                                    "2022-5",
+                                    "2022-6",
+                                    "2022-7",
+                                    "2022-8",
+                                    "2022-9",
+                                    "2022-10",
+                                    "2022-11",
+                                    "2022-12",
+                                    "2023-1"
+                                ],
+                                values: [
+                                    19.65811965811966,
+                                    68.57142857142857,
+                                    62.264150943396224,
+                                    45.65217391304348,
+                                    40.816326530612244,
+                                    25,
+                                    37.5,
+                                    21.487603305785125,
+                                    17.77777777777778,
+                                    24.46043165467626,
+                                    12.060301507537687,
+                                    0,
+                                    0
+                                ]
+                            }
+                        }
+                    }
+                ],
+                currentPage: 1,
+                totalPages: 1
+            }
+          

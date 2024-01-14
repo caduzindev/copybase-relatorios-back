@@ -12,7 +12,10 @@ RUN chmod -R 777 static
 
 RUN npm ci
 RUN npx tsc
+
 ENV PORT=3005
+ENV SWAGGER_BASE_SERVER=http://localhost:3005
+ENV SWAGGER_DOCS_PATH=/app/src/presentation/routes/swagger
 
 EXPOSE 3005
 CMD ["npm", "start"]

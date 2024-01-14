@@ -40,6 +40,7 @@ docker-compose up -d
 # Portas acessiveis
 localhost:8081 -> Mongo Express
 localhost:3005 -> API backend
+localhost:3005/api/swagger -> Pagina do swagger
 
 # Para parar de rodar, na raiz do projeto
 docker-compose down
@@ -47,4 +48,3 @@ docker-compose down
 
 ### Melhorias que eu faria
 - TDD e Testes Funcionais
-- Swagger
