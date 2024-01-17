@@ -17,6 +17,9 @@ export class ReportUseCase implements IReportUseCase {
     ) {}
 
     async requestReport(filePath: string, fileName: string): Promise<void> {
+        if (!filePath) throw new BusinessError('Parametro filePath esta vazio ou inexistente')
+        if (!fileName) throw new BusinessError('Parametro fileName esta vazio ou inexistente')
+
         const reportToSave = new Report({
             filePath,
             fileName,
