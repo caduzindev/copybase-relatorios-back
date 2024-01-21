@@ -1,4 +1,4 @@
-# Copybase Relatorios Back
+# Relatorios Back Sass
 
 ## Descrição
 Este e o backend do projeto, onde oferece uma api para importar arquivos csv e listar relatorios de SAAS como MRR e Churn Rate
@@ -32,8 +32,8 @@ Instruções passo a passo para configurar o projeto localmente. Por exemplo:
 
 ```bash
 # Clone o repositório
-git clone https://github.com/caduzindev/copybase-relatorios-back.git
-cd copybase-relatorios-back
+git clone https://github.com/caduzindev/relatorios-back-sass.git
+cd relatorios-back-sass
 
 # Na raiz do projeto rode
 docker-compose up -d
@@ -46,6 +46,3 @@ localhost:3005/api/swagger -> Pagina do swagger
 # Para parar de rodar, na raiz do projeto
 docker-compose down
 ```
-
-### Melhorias que eu faria
-- TDD e Testes Funcionais
