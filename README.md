@@ -14,6 +14,7 @@ Este e o backend do projeto, onde oferece uma api para importar arquivos csv e l
 - **MongoDB**: Banco de dados NoSQL que opera com documentos
 - **Docker + Docker-Compose**: Para simular um ambiente de desenvolvimento
 - **Swagger**: Para documentar rotas da API
+- **Jest**: Para escrever testes
 
 ## Padrões
 - **Clean Architecture**: Arquitetura limpa e desacoplada que permite a não dependencia de qualquer lib ou agente externo
