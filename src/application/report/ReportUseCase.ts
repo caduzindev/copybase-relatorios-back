@@ -120,10 +120,7 @@ export class ReportUseCase implements IReportUseCase {
             for (let quantity = 0;quantity <= quantityOfCharges;quantity++) {
                 const plusOneMonthDate = this.dateManager.plusMonthsToJsDate(convertStartDate, quantity);
                 const dateKey = this.generateKeyPerDate(plusOneMonthDate)
-                const amount = row.amount;
-                const mrr = row.periody === ReportFileStructurePeriody.YEARLY 
-                    ? amount / 12
-                    : amount;
+                const mrr = Report.calcAmountMrrForPeriody(row.periody, row.amount);
                 if (!monthlyData[dateKey]) {
                     monthlyData[dateKey] = {
                         MRR: 0,
@@ -133,6 +130,7 @@ export class ReportUseCase implements IReportUseCase {
                     };
                     monthLabels.push(dateKey)
                 }
+
                 const convertCancelDate = this.dateManager.convertToDate(row.cancelDate);
                 const reachCancelDate = ReportFileStructureStatus.ACTIVE 
                     && plusOneMonthDate.getTime() === convertCancelDate.getTime()

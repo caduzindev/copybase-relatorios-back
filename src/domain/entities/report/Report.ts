@@ -15,6 +15,12 @@ export class Report<T> {
         this.status = report.status;
         this.resultProcess = report.resultProcess;
     }
+
+    static calcAmountMrrForPeriody(periody: ReportFileStructurePeriody, amount: number) {
+        return periody === ReportFileStructurePeriody.YEARLY 
+        ? amount / 12
+        : amount;
+    }
 }
 
 export interface ReportFileStructure {
