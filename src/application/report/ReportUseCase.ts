@@ -70,7 +70,7 @@ export class ReportUseCase implements IReportUseCase {
     
             combinedData.forEach(item => {
                 labels.push(item.date)
-                resultMrr.push(item.mrr)
+                resultMrr.push(Number(item.mrr.toFixed(2)))
                 resultChurnRate.push(item.churnRate * 100)
             })
             
@@ -90,7 +90,6 @@ export class ReportUseCase implements IReportUseCase {
                 resultProcess 
             })
         } catch(err: any) {
-            console.log(err)
             const resultProcess: MetricsReportError = {
                 error: true,
                 reason: err.message as string
@@ -134,6 +133,11 @@ export class ReportUseCase implements IReportUseCase {
                     };
                     monthLabels.push(dateKey)
                 }
+                const convertCancelDate = this.dateManager.convertToDate(row.cancelDate);
+                const reachCancelDate = ReportFileStructureStatus.ACTIVE 
+                    && plusOneMonthDate.getTime() === convertCancelDate.getTime()
+
+                if (reachCancelDate) break
 
                 monthlyData[dateKey].MRR += mrr;
 
@@ -141,14 +145,13 @@ export class ReportUseCase implements IReportUseCase {
                     monthlyData[dateKey].activeSubscriptions++;
                 }
             }
-
+            
             if (row.status === ReportFileStructureStatus.CANCELED) {
                 const convertCancelDate = this.dateManager.convertToDate(row.cancelDate);
                 const dateKey = this.generateKeyPerDate(convertCancelDate)
                 monthlyData[dateKey].canceledSubscriptions++
             }
         });
-
         monthLabels.forEach((month) => {
             const actualMonth = monthlyData[month]
             monthlyData[month].churnRate = actualMonth.canceledSubscriptions / actualMonth.activeSubscriptions
